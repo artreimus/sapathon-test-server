@@ -14,7 +14,7 @@ app.use('/api/v1/validate-invoice', validateInvoiceRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware); // error handler must always be last
 
-const start = async () => {
+const start = () => {
   try {
     app.listen(port, console.log(`Listening on Port ${port}`));
   } catch (error) {
