@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { validateInvoice, validateInvoiceTwo } from '../controllers/invoice.js';
+
 const router = express.Router();
-
-const { validateInvoice } = require('../controllers/invoice');
-
 router.route('/:id').get(validateInvoice);
+router.route('/v2/:id').get(validateInvoiceTwo);
 
-module.exports = router;
+export default router;
