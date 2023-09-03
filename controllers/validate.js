@@ -30,13 +30,27 @@ const validateInvoiceWithImage = async (req, res) => {
 
   const data = await InvoiceImage.findOne({ invoiceNum });
 
+  if (!data) {
+    throw new CustomError.CustomAPIError('Data not found');
+  }
+
   const extractedData = await extractInvoiceData(data.image);
+
+  if (!extractedData) {
+    throw new CustomError.CustomAPIError('Failed to extract data');
+  }
 
   // const openAIData = { message: { content: 'Hello World' } };
   const openAIData = await OpenAIValidateInvoice(
     systemContent,
     JSON.stringify(extractedData)
   );
+
+  if (!openAIData) {
+    throw new CustomError.CustomAPIError(
+      'An error was encountered with OpenAPI'
+    );
+  }
 
   res.status(StatusCodes.OK).json({ data, extractedData, openAIData });
 };
