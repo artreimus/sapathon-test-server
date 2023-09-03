@@ -1,5 +1,5 @@
 const allowedOrigins = [
-  'https://ai-image-generator-obqp.onrender.com',
+  'https://sapathon-test-client.vercel.app',
   'http://localhost:3000',
 ];
 
