@@ -8,6 +8,7 @@ import errorHandlerMiddleware from './middleware/error-handler.js';
 import corsOptions from './config/corsOption.js';
 import cors from 'cors';
 import connectDB from './db/connect.js';
+import rootRoutes from './routes/rootRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -26,8 +27,9 @@ app.use(function (req, res, next) {
 app.set('trust proxy', 1);
 
 app.use(express.json({ limit: '50mb' }));
-app.use(express.static('public'));
+app.use(express.static('./public'));
 
+app.use('/', rootRoutes);
 app.use('/api/v1/validate-invoice', validateInvoiceRouterV1);
 app.use('/api/v1/storage', storageRouter);
 app.use('/api/v2/validate-invoice', validateInvoiceRouterV2);
