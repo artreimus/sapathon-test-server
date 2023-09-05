@@ -13,7 +13,7 @@ const openai = new OpenAI({
 });
 
 const systemContent = `
-Your role is that of an expert invoice validator. You will receive an input invoice in JSON format and your task is to determine its validity, providing a clear explanation for each field's validation. The validity can only either be VALID or INVALID.
+Your role is that of an expert invoice validator. You will receive two input invoices in JSON format, an expected invoice and an estimated invoice. Your task is to determine the validity of the estimated invoice, providing a clear explanation for each field's validation. The validity can only either be VALID or INVALID.
 
 A valid invoice must include the following mandatory fields, formatted correctly:
 
@@ -35,6 +35,10 @@ Total Amount Without VAT = Total Net Amount
 Total Amount With VAT = Total Net Amount + Total Tax 
 
 Display your step-by-step calculations for both the total amount without VAT and with VAT, and compare the results to the values in the input invoice.
+ 
+Lastly, I want you to Meticulously compare the details of the expected invoice with those of the estimated invoice in JSON format. Pay close attention to the following aspects to ensure data similarity and accuracy.
+
+For each field comparison of the invoices, output a concise explanation of your findings, explaining why it meets or fails the validation criteria.
 
 Your response should be accurate, comprehensive, and logically organized to explain the validation process and any discrepancies found.
 `;
