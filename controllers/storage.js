@@ -1,58 +1,61 @@
 import { StatusCodes } from 'http-status-codes';
-import CustomError from '../errors';
+import CustomError from '../errors/index.js';
 import asyncHandler from 'express-async-handler';
-import { v2 as cloudinary } from 'cloudinary';
+import { extractInvoiceData } from '../utils/minee.js';
+import InvoiceImage from '../models/InvoiceImage.js';
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const updateInvoice = asyncHandler(async (req, res) => {
+  const { id: invoiceNum } = req.params;
+
+  if (!invoiceNum) {
+    throw new CustomError.CustomAPIError('Please provide invoice number');
+  }
+
+  const data = await InvoiceImage.findOne({ invoiceNum });
+
+  if (!data) {
+    throw new CustomError.CustomAPIError('Data not found');
+  }
+
+  const extractedData = await extractInvoiceData(data.image);
+
+  if (!extractedData) {
+    throw new CustomError.CustomAPIError('Failed to extract data');
+  }
+
+  console.log(extractedData);
+
+  const invoiceImage = await InvoiceImage.findOneAndUpdate(
+    { invoiceNum },
+    {
+      invoiceDate: extractedData.invoiceDate,
+      dueDate: extractedData.dueDate,
+      supplier: {
+        name: extractedData.supplier.name,
+        address: extractedData.supplier.address,
+      },
+      customer: {
+        name: extractedData.customer.name,
+        address: extractedData.customer.address,
+      },
+      totalNet: extractedData.totalNet,
+      taxRate: extractedData.taxRate,
+      totalTax: extractedData.totalTax,
+      totalAmount: extractedData.totalAmount,
+      locale: {
+        currency: extractedData.locale.currency,
+        value: extractedData.locale.value,
+      },
+      lineItems: [...extractedData.lineItems],
+    },
+    { new: true }
+  );
+
+  if (!invoiceImage) {
+    throw new CustomError.CustomAPIError('Invoice not found');
+  }
+
+  res.status(StatusCodes.OK).json({ invoiceImage });
 });
 
-const uploadInvoice = asyncHandler(async (req, res) => {
-  const { invoiceNum: public_id, photo } = req.body;
-
-  if (!name || !prompt || !photo) {
-    throw new BadRequestError('Please provide all fields');
-  }
-
-  const photoUrl = await cloudinary.uploader.upload(photo, {
-    timeout: 180000,
-    use_filename: false,
-    public_id,
-    folder: 'sapathon-test',
-  });
-
-  if (!photoUrl) {
-    throw new CustomError.CustomAPIError(
-      'An error was encountered while saving the image'
-    );
-  }
-
-  res.status(StatusCodes.OK).json({ success: true, data: photoUrl });
-});
-
-const getInvoice = asyncHandler(async (req, res) => {
-  const { invoiceNum: public_id, photo } = req.body;
-
-  if (!name || !prompt || !photo) {
-    throw new BadRequestError('Please provide all fields');
-  }
-
-  const photoUrl = await cloudinary.uploader.upload(photo, {
-    timeout: 180000,
-    use_filename: false,
-    public_id,
-    folder: 'sapathon-test',
-  });
-
-  if (!photoUrl) {
-    throw new CustomError.CustomAPIError(
-      'An error was encountered while saving the image'
-    );
-  }
-
-  res.status(StatusCodes.OK).json({ success: true, data: photoUrl });
-});
-
-export { uploadInvoice };
+export { updateInvoice };
