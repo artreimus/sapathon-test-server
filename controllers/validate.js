@@ -51,4 +51,4 @@ const validateInvoiceWithImage = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ expectedData, extractedData, openAIData });
 });
 
-export { validateInvoice, validateInvoiceWithImage };
+export { validateInvoiceWithImage };
